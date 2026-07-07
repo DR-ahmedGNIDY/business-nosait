@@ -16,7 +16,7 @@ if (!PASSWORD) {
 
 async function main() {
   await connectDB();
-  const hashed = await bcrypt.hash(PASSWORD, 10);
+  const hashed = await bcrypt.hash(PASSWORD as string, 10);
 
   const user = await User.findOneAndUpdate(
     { email: EMAIL },
