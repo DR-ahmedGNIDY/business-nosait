@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Nosait Business theme.
+  Brand: Primary #1877F2, Dark #0F172A, Secondary #2563EB, Accent #3B82F6.
+  Colors stored as HSL channels so Tailwind can compose opacity.
+*/
+@layer base {
+  :root {
+    --background: 0 0% 100%;            /* #FFFFFF */
+    --foreground: 222 47% 11%;          /* #0F172A */
+    --surface: 210 40% 98%;             /* #F8FAFC */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 214 89% 52%;             /* #1877F2 */
+    --primary-hover: 214 82% 50%;       /* #1B74E4 */
+    --primary-active: 214 82% 48%;      /* #166FE5 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 221 83% 53%;           /* #2563EB */
+    --secondary-foreground: 0 0% 100%;
+    --accent: 217 91% 60%;              /* #3B82F6 */
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;    /* #64748B */
+
+    --success: 142 71% 45%;             /* #22C55E */
+    --warning: 38 92% 50%;              /* #F59E0B */
+    --danger: 0 84% 60%;                /* #EF4444 */
+
+    --border: 214 32% 91%;              /* #E2E8F0 */
+    --input: 214 32% 91%;
+    --ring: 214 89% 52%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+    --surface: 222 47% 11%;
+    --card: 222 44% 12%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 44% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 214 89% 56%;
+    --primary-hover: 214 89% 60%;
+    --primary-active: 214 89% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 221 83% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 217 91% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 217 33% 18%;
+    --muted-foreground: 215 20% 65%;
+
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --danger: 0 84% 60%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 22%;
+    --ring: 214 89% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-surface text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  /* RTL support */
+  [dir="rtl"] .flip-rtl {
+    transform: scaleX(-1);
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-lg border border-border bg-card text-card-foreground shadow-card;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-border;
+  }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #contract-print,
+  #contract-print * {
+    visibility: visible;
+  }
+  #contract-print {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    width: 100%;
+  }
+}
