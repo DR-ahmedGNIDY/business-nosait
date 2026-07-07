@@ -4,19 +4,17 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "../src/lib/db";
 import { User } from "../src/models/User";
 import { Settings } from "../src/models/Settings";
+import { requireEnv, envOr } from "./lib/env";
 
-const NAME = process.env.ADMIN_NAME || "Ahmed";
-const EMAIL = process.env.ADMIN_EMAIL || "ahmed@nosait.com";
-const PASSWORD = process.env.ADMIN_PASSWORD;
+// `requireEnv`/`envOr` guarantee `string`, so no casts or assertions are needed.
+const NAME: string = envOr("ADMIN_NAME", "Ahmed");
+const EMAIL: string = envOr("ADMIN_EMAIL", "ahmed@nosait.com").toLowerCase();
+const PASSWORD: string = requireEnv("ADMIN_PASSWORD");
 
-if (!PASSWORD) {
-  console.error("✖ Set ADMIN_PASSWORD env var, e.g. ADMIN_PASSWORD=... npx tsx scripts/create-admin.ts");
-  process.exit(1);
-}
-
-async function main() {
+async function main(): Promise<void> {
   await connectDB();
-  const hashed = await bcrypt.hash(PASSWORD as string, 10);
+
+  const hashed: string = await bcrypt.hash(PASSWORD, 10);
 
   const user = await User.findOneAndUpdate(
     { email: EMAIL },
@@ -30,11 +28,10 @@ async function main() {
   console.log("✔ Admin account ready");
   console.log("  Email:", user.email);
   console.log("  Role: ", user.role);
-  console.log("  Login password:", PASSWORD);
   await mongoose.disconnect();
 }
 
-main().catch((e) => {
-  console.error("✖ Failed:", e.message);
+main().catch((e: unknown) => {
+  console.error("✖ Failed:", e instanceof Error ? e.message : e);
   process.exit(1);
 });
