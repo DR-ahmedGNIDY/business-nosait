@@ -1,0 +1,3 @@
+# Manual CLI/admin-bootstrap tooling — not part of the deployed app.
+# Keeps scripts out of Vercel's build entirely (they run locally via tsx).
+scripts
