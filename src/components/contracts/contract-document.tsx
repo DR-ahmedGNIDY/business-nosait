@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 interface Props {
@@ -41,7 +42,9 @@ export function ContractDocument({ contract, clientName, business = "Nosait Busi
         <div>
           <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Company</p>
           <div className="flex h-20 items-center border-b border-slate-300">
-            {contract.companySignature?.dataUrl && <img src={contract.companySignature.dataUrl} alt="Company signature" className="max-h-16" />}
+            {contract.companySignature?.dataUrl && (
+              <Image src={contract.companySignature.dataUrl} alt="Company signature" width={200} height={64} className="max-h-16 w-auto object-contain" unoptimized />
+            )}
           </div>
           <p className="mt-1 text-xs text-slate-500">{contract.companySignature?.name || business}</p>
           {contract.companySignature?.signedAt && <p className="text-[10px] text-slate-400">{formatDate(contract.companySignature.signedAt)}</p>}
@@ -49,7 +52,9 @@ export function ContractDocument({ contract, clientName, business = "Nosait Busi
         <div>
           <p className="mb-2 text-xs font-semibold uppercase text-slate-500">Client</p>
           <div className="flex h-20 items-center border-b border-slate-300">
-            {contract.clientSignature?.dataUrl && <img src={contract.clientSignature.dataUrl} alt="Client signature" className="max-h-16" />}
+            {contract.clientSignature?.dataUrl && (
+              <Image src={contract.clientSignature.dataUrl} alt="Client signature" width={200} height={64} className="max-h-16 w-auto object-contain" unoptimized />
+            )}
           </div>
           <p className="mt-1 text-xs text-slate-500">{contract.clientSignature?.name || clientName || "Client"}</p>
           {contract.clientSignature?.signedAt && <p className="text-[10px] text-slate-400">{formatDate(contract.clientSignature.signedAt)}</p>}

@@ -1,4 +1,5 @@
 import * as React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 export function Skeleton({ className }: { className?: string }) {
@@ -54,8 +55,8 @@ export function Avatar({ name, src, className }: { name?: string; src?: string; 
     .map((n) => n[0]?.toUpperCase())
     .join("");
   return (
-    <div className={cn("flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-sm font-semibold text-primary", className)}>
-      {src ? <img src={src} alt={name} className="h-full w-full object-cover" /> : init}
+    <div className={cn("relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-sm font-semibold text-primary", className)}>
+      {src ? <Image src={src} alt={name || "avatar"} fill sizes="56px" className="object-cover" unoptimized /> : init}
     </div>
   );
 }
