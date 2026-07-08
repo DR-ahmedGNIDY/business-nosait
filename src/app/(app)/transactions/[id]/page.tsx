@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import mongoose from "mongoose";
 import { Pencil, Printer, ArrowLeft } from "lucide-react";
 import { connectDB } from "@/lib/db";
 import { Transaction } from "@/models/Transaction";
@@ -17,6 +18,7 @@ export const dynamic = "force-dynamic";
 
 export default async function TransactionDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) notFound();
   const { t, locale } = await getT();
   await connectDB();
   const tx = await Transaction.findOne({ _id: id, deletedAt: null }).lean<any>();

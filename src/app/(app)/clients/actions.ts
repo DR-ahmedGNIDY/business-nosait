@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import mongoose from "mongoose";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { Client } from "@/models/Client";
@@ -35,6 +36,7 @@ export async function createClient(formData: FormData) {
 
 export async function updateClient(id: string, formData: FormData) {
   const session = await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Client not found" };
   const parsed = parse(formData);
   if (!parsed.success) return { error: parsed.error.errors[0]?.message || "Invalid input" };
   await connectDB();
@@ -47,6 +49,7 @@ export async function updateClient(id: string, formData: FormData) {
 
 export async function deleteClient(id: string) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Client not found" };
   await connectDB();
   await Promise.all([
     Client.findByIdAndDelete(id),

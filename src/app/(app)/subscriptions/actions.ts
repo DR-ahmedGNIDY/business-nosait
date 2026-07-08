@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
@@ -36,6 +37,7 @@ export async function createSubscription(formData: FormData) {
 
 export async function updateSubscription(id: string, formData: FormData) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Not found" };
   const parsed = normalize(formData);
   if (!parsed.success) return { error: parsed.error.errors[0]?.message || "Invalid input" };
   await connectDB();
@@ -48,6 +50,7 @@ export async function updateSubscription(id: string, formData: FormData) {
 
 export async function deleteSubscription(id: string) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return;
   await connectDB();
   await Subscription.findByIdAndDelete(id);
   revalidatePath("/subscriptions");
@@ -56,6 +59,7 @@ export async function deleteSubscription(id: string) {
 /** Mark a subscription collected and record a separate (non-project) transaction. */
 export async function collectSubscription(id: string) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Not found" };
   await connectDB();
   const sub = await Subscription.findById(id);
   if (!sub) return { error: "Not found" };
@@ -82,6 +86,7 @@ export async function collectSubscription(id: string) {
 /** Roll the renewal date forward by its cycle and reset collected. */
 export async function renewSubscription(id: string) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Not found" };
   await connectDB();
   const sub = await Subscription.findById(id);
   if (!sub) return { error: "Not found" };

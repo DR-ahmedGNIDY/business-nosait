@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import mongoose from "mongoose";
 import { ArrowLeft, Pencil, Clock } from "lucide-react";
 import { connectDB } from "@/lib/db";
 import { Contract } from "@/models/Contract";
@@ -20,6 +21,7 @@ const EVENT_LABEL: Record<string, string> = { created: "Created", sent: "Sent fo
 
 export default async function ContractDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) notFound();
   await connectDB();
   const contract = await Contract.findById(id).lean<any>();
   if (!contract) notFound();

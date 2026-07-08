@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import mongoose from "mongoose";
 import { connectDB } from "@/lib/db";
 import { Transaction } from "@/models/Transaction";
 import { Client } from "@/models/Client";
@@ -13,6 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ReceiptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) notFound();
   await connectDB();
   const tx = await Transaction.findOne({ _id: id, deletedAt: null }).lean<any>();
   if (!tx) notFound();

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
+import mongoose from "mongoose";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { Contract } from "@/models/Contract";
@@ -44,6 +45,7 @@ export async function createContract(formData: FormData) {
 
 export async function updateContract(id: string, formData: FormData) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Not found" };
   const parsed = contractSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0]?.message || "Invalid input" };
   await connectDB();
@@ -58,6 +60,7 @@ export async function updateContract(id: string, formData: FormData) {
 
 export async function setContractStatus(id: string, status: "draft" | "waiting_signature" | "signed" | "cancelled") {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Not found" };
   await connectDB();
   const contract = await Contract.findById(id);
   if (!contract) return { error: "Not found" };
@@ -74,6 +77,7 @@ export async function setContractStatus(id: string, status: "draft" | "waiting_s
 /** Company-side signature saved from the dashboard. */
 export async function saveCompanySignature(id: string, dataUrl: string, name: string) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Not found" };
   await connectDB();
   const contract = await Contract.findById(id);
   if (!contract) return { error: "Not found" };
@@ -85,6 +89,7 @@ export async function saveCompanySignature(id: string, dataUrl: string, name: st
 
 export async function deleteContract(id: string) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Not found" };
   await connectDB();
   const contract = await Contract.findByIdAndDelete(id);
   await logActivity({ action: "delete", entity: "Contract", entityId: id, description: `Deleted contract ${contract?.contractNumber || id}` });
