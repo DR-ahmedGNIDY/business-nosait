@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/nosait-business";
+import { getMongoUri } from "./env";
 
 interface MongooseCache {
   conn: typeof mongoose | null;
@@ -18,7 +17,14 @@ global._mongooseCache = cached;
 export async function connectDB() {
   if (cached.conn) return cached.conn;
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, { bufferCommands: false }).then((m) => m);
+    const uri = getMongoUri();
+    cached.promise = mongoose
+      .connect(uri, { bufferCommands: false })
+      .then((m) => m)
+      .catch((e) => {
+        console.error("[db] MongoDB connection failed:", e instanceof Error ? e.message : e);
+        throw e;
+      });
   }
   try {
     cached.conn = await cached.promise;
