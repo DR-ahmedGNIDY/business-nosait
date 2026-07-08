@@ -2,6 +2,7 @@ import { z } from "zod";
 import {
   CLIENT_STATUS, PROJECT_STATUS, PROJECT_CATEGORY, SUBSCRIPTION_TYPE, SUBSCRIPTION_STATUS,
   EXPENSE_CATEGORY, PAYMENT_METHOD, CONTRACT_STATUS, CONTRACT_TEMPLATE,
+  TRANSACTION_STATUS, TRANSACTION_SOURCE,
 } from "./constants";
 
 export const clientSchema = z.object({
@@ -59,7 +60,8 @@ export const transactionSchema = z.object({
   title: z.string().min(2),
   amount: z.coerce.number().min(0),
   method: z.enum(PAYMENT_METHOD).default("cash"),
-  source: z.enum(["project", "subscription", "other"]).default("other"),
+  source: z.enum(TRANSACTION_SOURCE).default("other"),
+  status: z.enum(TRANSACTION_STATUS).default("completed"),
   clientId: z.string().optional(),
   date: z.string().optional(),
   note: z.string().optional(),

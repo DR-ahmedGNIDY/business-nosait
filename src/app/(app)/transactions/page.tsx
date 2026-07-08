@@ -31,8 +31,10 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     Client.find().select("name").sort({ name: 1 }).lean(),
   ]);
 
-  const total = all.reduce((s, t: any) => s + t.amount, 0);
-  const byMethod = PAYMENT_METHOD.map((m) => ({ m, total: all.filter((t: any) => t.method === m).reduce((s, t: any) => s + t.amount, 0) }));
+  // Only completed transactions count as collected money (matches dashboard analytics).
+  const completed = all.filter((t: any) => (t.status || "completed") === "completed");
+  const total = completed.reduce((s, t: any) => s + t.amount, 0);
+  const byMethod = PAYMENT_METHOD.map((m) => ({ m, total: completed.filter((t: any) => t.method === m).reduce((s, t: any) => s + t.amount, 0) }));
 
   return (
     <div className="animate-fade-in space-y-6">
@@ -59,13 +61,14 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
         <EmptyState icon={<ArrowDownToLine className="h-5 w-5" />} title={t("transactions.empty")} description={t("transactions.emptyDesc")} />
       ) : (
         <Table>
-          <THead><TR><TH>{t("common.title")}</TH><TH>{t("common.client")}</TH><TH>{t("transactions.source")}</TH><TH>{t("common.method")}</TH><TH>{t("common.amount")}</TH><TH>{t("common.date")}</TH><TH></TH></TR></THead>
+          <THead><TR><TH>{t("common.title")}</TH><TH>{t("common.client")}</TH><TH>{t("transactions.source")}</TH><TH>{t("common.status")}</TH><TH>{t("common.method")}</TH><TH>{t("common.amount")}</TH><TH>{t("common.date")}</TH><TH></TH></TR></THead>
           <tbody>
             {txns.map((tx: any) => (
               <TR key={tx._id}>
                 <TD className="font-medium">{tx.title}</TD>
                 <TD className="text-muted-foreground">{tx.clientId?.name || "—"}</TD>
                 <TD><Badge tone={tx.source === "subscription" ? "success" : tx.source === "project" ? "primary" : "muted"}>{label(tx.source, locale)}</Badge></TD>
+                <TD><Badge tone={(tx.status || "completed") === "completed" ? "success" : tx.status === "pending" ? "warning" : "danger"}>{label(tx.status || "completed", locale)}</Badge></TD>
                 <TD>{label(tx.method, locale)}</TD>
                 <TD className="font-semibold text-success">{formatCurrency(tx.amount)}</TD>
                 <TD>{formatDate(tx.date)}</TD>

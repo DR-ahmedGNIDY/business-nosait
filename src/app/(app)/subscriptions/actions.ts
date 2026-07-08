@@ -70,6 +70,8 @@ export async function collectSubscription(id: string) {
   });
   await logActivity({ action: "collect", entity: "Subscription", entityId: id, description: `Collected subscription ${sub.title}` });
   revalidatePath("/subscriptions");
+  revalidatePath("/transactions");
+  revalidatePath("/dashboard");
   return { ok: true };
 }
 

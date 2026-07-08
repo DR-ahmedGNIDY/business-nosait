@@ -24,6 +24,7 @@ export async function createExpense(formData: FormData) {
   await Expense.create({ ...rest, date: date ? new Date(date) : new Date() });
   await logActivity({ action: "create", entity: "Expense", description: `Added expense ${rest.title}` });
   revalidatePath("/expenses");
+  revalidatePath("/dashboard");
   return { ok: true };
 }
 
@@ -32,4 +33,5 @@ export async function deleteExpense(id: string) {
   await connectDB();
   await Expense.findByIdAndDelete(id);
   revalidatePath("/expenses");
+  revalidatePath("/dashboard");
 }

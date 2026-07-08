@@ -4,34 +4,49 @@ import { Subscription } from "@/models/Subscription";
 import { Expense } from "@/models/Expense";
 import { Client } from "@/models/Client";
 import { Contract } from "@/models/Contract";
+import { Transaction } from "@/models/Transaction";
 import { daysUntil } from "./utils";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 /**
- * Core analytics. IMPORTANT business rule:
- * Subscriptions revenue is calculated SEPARATELY and is never folded into
- * project revenue. Net profit = collected project revenue + collected
- * subscription revenue - expenses.
+ * SINGLE SOURCE OF TRUTH for dashboard analytics.
+ *
+ * Business rules:
+ *  - All collected revenue is derived from COMPLETED transactions only.
+ *    Pending / cancelled / refunded transactions are ignored.
+ *  - Project revenue and subscription revenue are calculated SEPARATELY
+ *    (subscription revenue is never folded into project revenue).
+ *  - Total revenue   = projects collected + subscriptions collected
+ *  - Net profit      = total revenue - total expenses
+ *  - Outstanding     = sum(project price) - projects collected
  */
 export async function getDashboardData() {
   await connectDB();
 
-  const [projects, subscriptions, expenses, clientsCount, contracts] = await Promise.all([
+  const [projects, subscriptions, expenses, clientsCount, contracts, transactions] = await Promise.all([
     Project.find().lean(),
     Subscription.find().lean(),
     Expense.find().lean(),
     Client.countDocuments(),
     Contract.find().lean(),
+    Transaction.find({ status: "completed" }).lean(),
   ]);
 
-  // ---- Projects revenue (collected = sum of payments) ----
-  const projectsBilled = projects.reduce((s, p: any) => s + (p.price || 0), 0);
-  const projectsCollected = projects.reduce((s, p: any) => s + (p.paidAmount || 0), 0);
-  const projectsOutstanding = projects.reduce((s, p: any) => s + (p.remainingAmount || 0), 0);
+  // ---- Revenue from completed transactions (single source of truth) ----
+  const projectsCollected = transactions
+    .filter((t: any) => t.source === "project")
+    .reduce((s, t: any) => s + (t.amount || 0), 0);
+  const subsCollected = transactions
+    .filter((t: any) => t.source === "subscription")
+    .reduce((s, t: any) => s + (t.amount || 0), 0);
+  const totalRevenue = projectsCollected + subsCollected;
 
-  // ---- Subscriptions revenue (SEPARATE) ----
-  const subsCollected = subscriptions.filter((s: any) => s.collected).reduce((a, s: any) => a + (s.amount || 0), 0);
+  // ---- Projects billing / outstanding ----
+  const projectsBilled = projects.reduce((s, p: any) => s + (p.price || 0), 0);
+  const projectsOutstanding = Math.max(0, projectsBilled - projectsCollected);
+
+  // ---- Subscriptions (counts / pending are still driven by the sub records) ----
   const subsPending = subscriptions.filter((s: any) => !s.collected).reduce((a, s: any) => a + (s.amount || 0), 0);
   const subsAnnual = subscriptions.filter((s: any) => s.type === "yearly").reduce((a, s: any) => a + (s.amount || 0), 0);
   const subsMonthly = subscriptions.filter((s: any) => s.type === "monthly").reduce((a, s: any) => a + (s.amount || 0), 0);
@@ -41,14 +56,14 @@ export async function getDashboardData() {
   const totalExpenses = expenses.reduce((s, e: any) => s + (e.amount || 0), 0);
 
   // ---- Net profit ----
-  const netProfit = projectsCollected + subsCollected - totalExpenses;
+  const netProfit = totalRevenue - totalExpenses;
 
-  // ---- Monthly series (current year) ----
+  // ---- Monthly series (current year), also from completed transactions ----
   const year = new Date().getFullYear();
   const monthly = MONTHS.map((m, i) => {
     const inMonth = (d?: Date) => d && new Date(d).getFullYear() === year && new Date(d).getMonth() === i;
-    const projRev = projects.reduce((s, p: any) => s + (p.payments || []).filter((pay: any) => inMonth(pay.date)).reduce((a: number, pay: any) => a + pay.amount, 0), 0);
-    const subRev = subscriptions.filter((sub: any) => sub.collected && inMonth(sub.updatedAt)).reduce((a, s: any) => a + s.amount, 0);
+    const projRev = transactions.filter((t: any) => t.source === "project" && inMonth(t.date)).reduce((a, t: any) => a + (t.amount || 0), 0);
+    const subRev = transactions.filter((t: any) => t.source === "subscription" && inMonth(t.date)).reduce((a, t: any) => a + (t.amount || 0), 0);
     const exp = expenses.filter((e: any) => inMonth(e.date)).reduce((a, e: any) => a + e.amount, 0);
     return { month: m, projects: projRev, subscriptions: subRev, expenses: exp, profit: projRev + subRev - exp };
   });
@@ -79,6 +94,7 @@ export async function getDashboardData() {
       projectsBilled,
       projectsCollected,
       projectsOutstanding,
+      totalRevenue,
       subsCollected,
       subsPending,
       subsAnnual,

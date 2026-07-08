@@ -29,6 +29,7 @@ export async function createProject(formData: FormData) {
   });
   await logActivity({ action: "create", entity: "Project", entityId: String(project._id), description: `Created project ${project.title}` });
   revalidatePath("/projects");
+  revalidatePath("/dashboard");
   redirect(`/projects/${project._id}`);
 }
 
@@ -48,6 +49,7 @@ export async function updateProject(id: string, formData: FormData) {
   await logActivity({ action: "update", entity: "Project", entityId: id, description: `Updated project ${project.title}` });
   revalidatePath("/projects");
   revalidatePath(`/projects/${id}`);
+  revalidatePath("/dashboard");
   redirect(`/projects/${id}`);
 }
 
@@ -57,6 +59,7 @@ export async function deleteProject(id: string) {
   await Project.findByIdAndDelete(id);
   await logActivity({ action: "delete", entity: "Project", entityId: id, description: "Deleted a project" });
   revalidatePath("/projects");
+  revalidatePath("/dashboard");
   redirect("/projects");
 }
 
@@ -81,5 +84,8 @@ export async function addPayment(id: string, formData: FormData) {
   });
   await logActivity({ action: "payment", entity: "Project", entityId: id, description: `Recorded payment on ${project.title}` });
   revalidatePath(`/projects/${id}`);
+  revalidatePath("/projects");
+  revalidatePath("/transactions");
+  revalidatePath("/dashboard");
   return { ok: true };
 }

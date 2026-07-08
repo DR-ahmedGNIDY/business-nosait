@@ -22,6 +22,7 @@ export async function createTransaction(formData: FormData) {
   await Transaction.create({ ...rest, clientId: clientId || undefined, date: date ? new Date(date) : new Date() });
   await logActivity({ action: "create", entity: "Transaction", description: `Recorded ${rest.title}` });
   revalidatePath("/transactions");
+  revalidatePath("/dashboard");
   return { ok: true };
 }
 
@@ -30,4 +31,5 @@ export async function deleteTransaction(id: string) {
   await connectDB();
   await Transaction.findByIdAndDelete(id);
   revalidatePath("/transactions");
+  revalidatePath("/dashboard");
 }
