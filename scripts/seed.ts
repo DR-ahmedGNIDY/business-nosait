@@ -47,16 +47,14 @@ async function main() {
 
   const p1 = await Project.create({
     title: "Corporate Website", clientId: clients[0]._id, price: 40000, cost: 12000, category: "website",
-    status: "in_progress", startDate: addDays(-30), deliveryDate: addDays(20),
-    payments: [{ amount: 20000, method: "instapay", date: addDays(-25) }],
+    status: "in_progress", startDate: addDays(-30), deliveryDate: addDays(20), paidAmount: 20000,
   });
   const p2 = await Project.create({
     title: "E-commerce Store", clientId: clients[1]._id, price: 65000, cost: 20000, category: "store",
-    status: "completed", startDate: addDays(-90), deliveryDate: addDays(-10),
-    payments: [{ amount: 65000, method: "bank", date: addDays(-15) }],
+    status: "completed", startDate: addDays(-90), deliveryDate: addDays(-10), paidAmount: 65000,
   });
 
-  await Subscription.create([
+  const subs = await Subscription.create([
     { title: "Hosting - Cairo Retail", clientId: clients[0]._id, projectId: p1._id, type: "yearly", amount: 3000, renewalDate: addDays(12), status: "active", collected: false, service: "hosting" },
     { title: "Domain - Bloom", clientId: clients[1]._id, projectId: p2._id, type: "yearly", amount: 500, renewalDate: addDays(-3), status: "expired", collected: false, service: "domain" },
     { title: "Maintenance - Bloom", clientId: clients[1]._id, projectId: p2._id, type: "monthly", amount: 1500, renewalDate: addDays(5), status: "active", collected: true, service: "maintenance" },
@@ -69,9 +67,9 @@ async function main() {
   ]);
 
   await Transaction.create([
-    { title: "Website advance", amount: 20000, method: "instapay", source: "project", clientId: clients[0]._id, projectId: p1._id, date: addDays(-25) },
-    { title: "Store full payment", amount: 65000, method: "bank", source: "project", clientId: clients[1]._id, projectId: p2._id, date: addDays(-15) },
-    { title: "Maintenance fee", amount: 1500, method: "vodafone_cash", source: "subscription", clientId: clients[1]._id, date: addDays(-1) },
+    { title: "Website advance", amount: 20000, method: "instapay", source: "project", status: "completed", clientId: clients[0]._id, projectId: p1._id, date: addDays(-25) },
+    { title: "Store full payment", amount: 65000, method: "bank", source: "project", status: "completed", clientId: clients[1]._id, projectId: p2._id, date: addDays(-15) },
+    { title: "Maintenance fee", amount: 1500, method: "vodafone_cash", source: "subscription", status: "completed", clientId: clients[1]._id, subscriptionId: subs[2]._id, date: addDays(-1) },
   ]);
 
   await Contract.create({

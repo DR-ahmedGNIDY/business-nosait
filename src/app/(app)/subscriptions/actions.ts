@@ -8,6 +8,7 @@ import { connectDB } from "@/lib/db";
 import { Subscription } from "@/models/Subscription";
 import { Transaction } from "@/models/Transaction";
 import { subscriptionSchema } from "@/lib/validations";
+import { syncSubscriptionCollected } from "@/lib/sync";
 import { logActivity } from "@/lib/activity";
 
 async function requireSession() {
@@ -58,16 +59,16 @@ export async function collectSubscription(id: string) {
   await connectDB();
   const sub = await Subscription.findById(id);
   if (!sub) return { error: "Not found" };
-  sub.collected = true;
-  await sub.save();
   await Transaction.create({
     title: `Subscription — ${sub.title}`,
     amount: sub.amount,
     method: "cash",
     source: "subscription",
+    status: "completed",
     clientId: sub.clientId,
     subscriptionId: sub._id,
   });
+  await syncSubscriptionCollected(sub._id); // sets collected from completed transactions
   await logActivity({ action: "collect", entity: "Subscription", entityId: id, description: `Collected subscription ${sub.title}` });
   revalidatePath("/subscriptions");
   revalidatePath("/transactions");

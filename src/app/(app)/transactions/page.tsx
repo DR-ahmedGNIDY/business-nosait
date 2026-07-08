@@ -2,6 +2,8 @@ import { ArrowDownToLine, Wallet } from "lucide-react";
 import { connectDB } from "@/lib/db";
 import { Transaction } from "@/models/Transaction";
 import { Client } from "@/models/Client";
+import { Project } from "@/models/Project";
+import { Subscription } from "@/models/Subscription";
 import { PageHeader, EmptyState } from "@/components/ui/misc";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { Badge } from "@/components/ui/badge";
@@ -25,10 +27,12 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   if (sp.method) filter.method = sp.method;
   if (sp.source) filter.source = sp.source;
 
-  const [txns, all, clients] = await Promise.all([
+  const [txns, all, clients, projects, subscriptions] = await Promise.all([
     Transaction.find(filter).sort({ date: -1 }).populate("clientId", "name").lean(),
     Transaction.find().lean(),
     Client.find().select("name").sort({ name: 1 }).lean(),
+    Project.find().select("title clientId price paidAmount remainingAmount").lean(),
+    Subscription.find().select("title clientId amount renewalDate status collected").lean(),
   ]);
 
   // Only completed transactions count as collected money (matches dashboard analytics).
@@ -47,7 +51,12 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
         ))}
       </div>
 
-      <TransactionForm action={createTransaction} clients={JSON.parse(JSON.stringify(clients))} />
+      <TransactionForm
+        action={createTransaction}
+        clients={JSON.parse(JSON.stringify(clients))}
+        projects={JSON.parse(JSON.stringify(projects))}
+        subscriptions={JSON.parse(JSON.stringify(subscriptions))}
+      />
 
       <ListToolbar
         placeholder={t("transactions.searchPlaceholder")}

@@ -35,5 +35,8 @@ const TransactionSchema = new Schema<ITransaction>(
 
 TransactionSchema.index({ date: -1, method: 1, source: 1 });
 TransactionSchema.index({ status: 1, source: 1 });
+TransactionSchema.index({ clientId: 1 });
+TransactionSchema.index({ projectId: 1, status: 1 });
+TransactionSchema.index({ subscriptionId: 1, status: 1 });
 
 export const Transaction = models.Transaction || model<ITransaction>("Transaction", TransactionSchema);

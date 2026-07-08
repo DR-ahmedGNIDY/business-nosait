@@ -4,6 +4,7 @@ import { Pencil, Calendar, User } from "lucide-react";
 import { connectDB } from "@/lib/db";
 import { Project } from "@/models/Project";
 import { Client } from "@/models/Client";
+import { Transaction } from "@/models/Transaction";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge, Badge } from "@/components/ui/badge";
@@ -22,6 +23,7 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
   const project = await Project.findById(id).lean<any>();
   if (!project) notFound();
   const client = await Client.findById(project.clientId).lean<any>();
+  const payments = await Transaction.find({ projectId: id, source: "project" }).sort({ date: -1 }).lean<any[]>();
 
   const profit = (project.paidAmount || 0) - (project.cost || 0);
   const margin = project.paidAmount ? Math.round((profit / project.paidAmount) * 100) : 0;
@@ -69,16 +71,17 @@ export default async function ProjectDetail({ params }: { params: Promise<{ id: 
         </CardHeader>
         <CardContent className="space-y-4">
           <PaymentForm action={addPayment.bind(null, id)} />
-          {(!project.payments || project.payments.length === 0) ? (
+          {payments.length === 0 ? (
             <EmptyState title="No payments yet" description="Record a payment above to update the collected amount." />
           ) : (
             <Table>
-              <THead><TR><TH>Amount</TH><TH>Method</TH><TH>Date</TH><TH>Note</TH></TR></THead>
+              <THead><TR><TH>Amount</TH><TH>Method</TH><TH>Status</TH><TH>Date</TH><TH>Note</TH></TR></THead>
               <tbody>
-                {project.payments.map((p: any, i: number) => (
-                  <TR key={i}>
+                {payments.map((p: any) => (
+                  <TR key={String(p._id)}>
                     <TD className="font-medium text-success">{formatCurrency(p.amount)}</TD>
                     <TD><Badge>{p.method}</Badge></TD>
+                    <TD><Badge tone={(p.status || "completed") === "completed" ? "success" : p.status === "pending" ? "warning" : "danger"}>{p.status || "completed"}</Badge></TD>
                     <TD>{formatDate(p.date)}</TD>
                     <TD className="text-muted-foreground">{p.note || "—"}</TD>
                   </TR>

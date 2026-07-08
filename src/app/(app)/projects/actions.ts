@@ -8,6 +8,7 @@ import { connectDB } from "@/lib/db";
 import { Project } from "@/models/Project";
 import { Transaction } from "@/models/Transaction";
 import { projectSchema, paymentSchema } from "@/lib/validations";
+import { syncProjectPayments } from "@/lib/sync";
 import { logActivity } from "@/lib/activity";
 
 async function requireSession() {
@@ -70,18 +71,18 @@ export async function addPayment(id: string, formData: FormData) {
   await connectDB();
   const project = await Project.findById(id);
   if (!project) return { error: "Project not found" };
-  project.payments.push({ amount: parsed.data.amount, method: parsed.data.method, note: parsed.data.note, date: new Date() });
-  await project.save();
-  // Mirror as an incoming transaction (project source).
+  // Transaction is the source of truth; the project projection is synced after.
   await Transaction.create({
     title: `Payment — ${project.title}`,
     amount: parsed.data.amount,
     method: parsed.data.method,
     source: "project",
+    status: "completed",
     clientId: project.clientId,
     projectId: project._id,
     note: parsed.data.note,
   });
+  await syncProjectPayments(project._id);
   await logActivity({ action: "payment", entity: "Project", entityId: id, description: `Recorded payment on ${project.title}` });
   revalidatePath(`/projects/${id}`);
   revalidatePath("/projects");

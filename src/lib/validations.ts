@@ -56,16 +56,22 @@ export const expenseSchema = z.object({
   note: z.string().optional(),
 });
 
-export const transactionSchema = z.object({
-  title: z.string().min(2),
-  amount: z.coerce.number().min(0),
-  method: z.enum(PAYMENT_METHOD).default("cash"),
-  source: z.enum(TRANSACTION_SOURCE).default("other"),
-  status: z.enum(TRANSACTION_STATUS).default("completed"),
-  clientId: z.string().optional(),
-  date: z.string().optional(),
-  note: z.string().optional(),
-});
+export const transactionSchema = z
+  .object({
+    title: z.string().min(2),
+    amount: z.coerce.number().positive(),
+    method: z.enum(PAYMENT_METHOD).default("cash"),
+    source: z.enum(TRANSACTION_SOURCE).default("project"),
+    status: z.enum(TRANSACTION_STATUS).default("completed"),
+    clientId: z.string().min(1, "Client is required"),
+    projectId: z.string().optional(),
+    subscriptionId: z.string().optional(),
+    date: z.string().optional(),
+    note: z.string().optional(),
+  })
+  // Referential integrity: every transaction must link to its real object.
+  .refine((d) => d.source !== "project" || !!d.projectId, { message: "Project is required", path: ["projectId"] })
+  .refine((d) => d.source !== "subscription" || !!d.subscriptionId, { message: "Subscription is required", path: ["subscriptionId"] });
 
 export const contractSchema = z.object({
   title: z.string().min(2),

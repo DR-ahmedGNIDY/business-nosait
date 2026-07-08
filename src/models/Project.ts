@@ -54,11 +54,12 @@ const ProjectSchema = new Schema<IProject>(
   { timestamps: true }
 );
 
-// Keep paid/remaining in sync with payments before save.
+// remainingAmount is always derived from price - paidAmount.
+// paidAmount itself is the authoritative projection of completed transactions,
+// maintained by syncProjectPayments() in @/lib/sync — never recomputed here.
 ProjectSchema.pre("save", function (next) {
   const doc = this as unknown as IProject;
-  doc.paidAmount = (doc.payments || []).reduce((s, p) => s + (p.amount || 0), 0);
-  doc.remainingAmount = Math.max(0, (doc.price || 0) - doc.paidAmount);
+  doc.remainingAmount = Math.max(0, (doc.price || 0) - (doc.paidAmount || 0));
   next();
 });
 
