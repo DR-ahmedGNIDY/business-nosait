@@ -1,6 +1,9 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { LABELS } from "@/lib/constants";
+import { useI18n } from "@/components/i18n-provider";
 
 const toneClasses: Record<string, string> = {
   success: "bg-success/10 text-success ring-success/20",
@@ -33,9 +36,10 @@ export function Badge({
   );
 }
 
-/** Status badge that reads tone + label from the shared LABELS map. */
-export function StatusBadge({ status, lang = "en" }: { status: string; lang?: "en" | "ar" }) {
+/** Status badge that reads tone + localized label from the shared LABELS map. */
+export function StatusBadge({ status }: { status: string }) {
+  const { locale } = useI18n();
   const meta = LABELS[status];
   const tone = (meta?.tone as keyof typeof toneClasses) || "muted";
-  return <Badge tone={tone}>{meta?.[lang] || status}</Badge>;
+  return <Badge tone={tone}>{meta?.[locale] || status}</Badge>;
 }

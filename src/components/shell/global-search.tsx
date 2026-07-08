@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Loader2 } from "lucide-react";
+import { useT } from "@/components/i18n-provider";
 
 interface Result {
   type: string;
@@ -14,6 +15,7 @@ interface Result {
 
 export function GlobalSearch({ onClose }: { onClose: () => void }) {
   const router = useRouter();
+  const t = useT();
   const [q, setQ] = useState("");
   const [results, setResults] = useState<Result[]>([]);
   const [loading, setLoading] = useState(false);
@@ -48,14 +50,14 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
             autoFocus
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search clients, projects, contracts…"
+            placeholder={t("search.placeholder")}
             className="h-12 flex-1 bg-transparent text-sm outline-none"
           />
           <kbd className="rounded border border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">ESC</kbd>
         </div>
         <div className="scrollbar-thin max-h-80 overflow-y-auto p-2">
           {q.length >= 2 && results.length === 0 && !loading && (
-            <p className="py-8 text-center text-sm text-muted-foreground">No results for “{q}”</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">{t("search.noResults", { q })}</p>
           )}
           {results.map((r) => (
             <button
@@ -70,7 +72,7 @@ export function GlobalSearch({ onClose }: { onClose: () => void }) {
                 <p className="text-sm font-medium">{r.title}</p>
                 {r.subtitle && <p className="text-xs text-muted-foreground">{r.subtitle}</p>}
               </div>
-              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] capitalize text-muted-foreground">{r.type}</span>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] capitalize text-muted-foreground">{t(`search.${r.type}`)}</span>
             </button>
           ))}
         </div>

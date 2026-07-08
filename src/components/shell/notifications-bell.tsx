@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Bell, Check } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "@/lib/utils";
+import { useT } from "@/components/i18n-provider";
 
 interface Notif {
   _id: string;
@@ -19,6 +20,7 @@ interface Notif {
 export function NotificationsBell() {
   const [open, setOpen] = useState(false);
   const qc = useQueryClient();
+  const t = useT();
 
   const { data } = useQuery<{ items: Notif[]; unread: number }>({
     queryKey: ["notifications"],
@@ -49,16 +51,16 @@ export function NotificationsBell() {
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute z-20 mt-2 w-80 rounded-lg border border-border bg-popover shadow-pop ltr:right-0 rtl:left-0">
             <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-              <p className="text-sm font-semibold">Notifications</p>
+              <p className="text-sm font-semibold">{t("notifications.title")}</p>
               {unread > 0 && (
                 <button onClick={() => markAll.mutate()} className="flex items-center gap-1 text-xs text-primary hover:underline">
-                  <Check className="h-3 w-3" /> Mark all read
+                  <Check className="h-3 w-3" /> {t("notifications.markAllRead")}
                 </button>
               )}
             </div>
             <div className="scrollbar-thin max-h-96 overflow-y-auto">
               {items.length === 0 ? (
-                <p className="px-4 py-8 text-center text-sm text-muted-foreground">No notifications</p>
+                <p className="px-4 py-8 text-center text-sm text-muted-foreground">{t("notifications.empty")}</p>
               ) : (
                 items.map((n) => (
                   <Link
@@ -80,7 +82,7 @@ export function NotificationsBell() {
               )}
             </div>
             <Link href="/notifications" onClick={() => setOpen(false)} className="block border-t border-border py-2 text-center text-xs font-medium text-primary hover:underline">
-              View all
+              {t("notifications.viewAll")}
             </Link>
           </div>
         </>

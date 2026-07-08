@@ -7,13 +7,15 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge, Badge } from "@/components/ui/badge";
 import { Table, THead, TR, TH, TD } from "@/components/ui/table";
 import { ListToolbar } from "@/components/list-toolbar";
-import { CONTRACT_STATUS } from "@/lib/constants";
+import { getT } from "@/lib/i18n-server";
+import { CONTRACT_STATUS, label } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function ContractsPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const sp = await searchParams;
+  const { t, locale } = await getT();
   await connectDB();
   const filter: any = {};
   if (sp.q) filter.$or = [{ title: new RegExp(sp.q, "i") }, { contractNumber: new RegExp(sp.q, "i") }];
@@ -23,18 +25,18 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Contracts" subtitle={`${contracts.length} contracts`}>
-        <Link href="/contracts/new"><Button><Plus className="h-4 w-4" /> New contract</Button></Link>
+      <PageHeader title={t("contracts.title")} subtitle={t("contracts.count", { count: contracts.length })}>
+        <Link href="/contracts/new"><Button><Plus className="h-4 w-4" /> {t("contracts.new")}</Button></Link>
       </PageHeader>
 
-      <ListToolbar placeholder="Search by title or number…" filters={[{ name: "status", label: "All statuses", options: CONTRACT_STATUS.map((s) => ({ value: s, label: s })) }]} />
+      <ListToolbar placeholder={t("contracts.searchPlaceholder")} filters={[{ name: "status", label: t("common.allStatuses"), options: CONTRACT_STATUS.map((s) => ({ value: s, label: label(s, locale) })) }]} />
 
       {contracts.length === 0 ? (
-        <EmptyState icon={<FileSignature className="h-5 w-5" />} title="No contracts" description="Generate an electronic contract from a template."
-          action={<Link href="/contracts/new"><Button><Plus className="h-4 w-4" /> New contract</Button></Link>} />
+        <EmptyState icon={<FileSignature className="h-5 w-5" />} title={t("contracts.empty")} description={t("contracts.emptyDesc")}
+          action={<Link href="/contracts/new"><Button><Plus className="h-4 w-4" /> {t("contracts.new")}</Button></Link>} />
       ) : (
         <Table>
-          <THead><TR><TH>Number</TH><TH>Title</TH><TH>Client</TH><TH>Value</TH><TH>Template</TH><TH>Status</TH><TH>Created</TH></TR></THead>
+          <THead><TR><TH>{t("contracts.number")}</TH><TH>{t("common.title")}</TH><TH>{t("common.client")}</TH><TH>{t("common.amount")}</TH><TH>{t("contracts.template")}</TH><TH>{t("common.status")}</TH><TH>{t("contracts.created")}</TH></TR></THead>
           <tbody>
             {contracts.map((c: any) => (
               <TR key={c._id}>
@@ -42,7 +44,7 @@ export default async function ContractsPage({ searchParams }: { searchParams: Pr
                 <TD><Link href={`/contracts/${c._id}`} className="font-medium hover:text-primary">{c.title}</Link></TD>
                 <TD className="text-muted-foreground">{c.clientId?.name || "—"}</TD>
                 <TD>{formatCurrency(c.value)}</TD>
-                <TD><Badge tone="accent">{c.template}</Badge></TD>
+                <TD><Badge tone="accent">{label(c.template, locale)}</Badge></TD>
                 <TD><StatusBadge status={c.status} /></TD>
                 <TD>{formatDate(c.createdAt)}</TD>
               </TR>

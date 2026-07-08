@@ -39,6 +39,25 @@ export const LABELS: Record<string, { en: string; ar: string; tone?: string }> =
   bank: { en: "Bank", ar: "تحويل بنكي" },
   vodafone_cash: { en: "Vodafone Cash", ar: "فودافون كاش" },
   card: { en: "Card", ar: "بطاقة" },
+  // Project categories
+  website: { en: "Website", ar: "موقع إلكتروني" },
+  store: { en: "Store", ar: "متجر" },
+  application: { en: "Application", ar: "تطبيق" },
+  hosting: { en: "Hosting", ar: "استضافة" },
+  maintenance: { en: "Maintenance", ar: "صيانة" },
+  marketing: { en: "Marketing", ar: "تسويق" },
+  other: { en: "Other", ar: "أخرى" },
+  // Expense categories
+  domains: { en: "Domains", ar: "نطاقات" },
+  advertising: { en: "Advertising", ar: "إعلانات" },
+  employees: { en: "Employees", ar: "موظفون" },
+  software: { en: "Software", ar: "برمجيات" },
+  internet: { en: "Internet", ar: "إنترنت" },
+  office: { en: "Office", ar: "مكتب" },
+  tools: { en: "Tools", ar: "أدوات" },
+  // Transaction sources
+  project: { en: "Project", ar: "مشروع" },
+  subscription: { en: "Subscription", ar: "اشتراك" },
 };
 
 export function label(key: string, lang: "en" | "ar" = "en") {

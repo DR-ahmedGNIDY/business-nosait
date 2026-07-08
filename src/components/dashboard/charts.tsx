@@ -5,6 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { formatCurrency } from "@/lib/utils";
+import { useT } from "@/components/i18n-provider";
 
 const PIE_COLORS = ["#1877F2", "#2563EB", "#3B82F6", "#22C55E", "#F59E0B", "#EF4444", "#8B5CF6", "#64748B", "#0EA5E9", "#14B8A6"];
 
@@ -23,6 +24,7 @@ const tooltipStyle = {
 type MonthPoint = { month: string; projects: number; subscriptions: number; expenses: number; profit: number };
 
 export function RevenueChart({ data }: { data: MonthPoint[] }) {
+  const t = useT();
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={data} margin={{ left: -10, right: 8, top: 8 }}>
@@ -41,14 +43,15 @@ export function RevenueChart({ data }: { data: MonthPoint[] }) {
         <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={60} tickFormatter={(v) => (v >= 1000 ? `${v / 1000}k` : v)} />
         <Tooltip {...tooltipStyle} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Area type="monotone" dataKey="projects" name="Projects" stroke="#1877F2" strokeWidth={2} fill="url(#gProj)" />
-        <Area type="monotone" dataKey="subscriptions" name="Subscriptions" stroke="#22C55E" strokeWidth={2} fill="url(#gSub)" />
+        <Area type="monotone" dataKey="projects" name={t("charts.projects")} stroke="#1877F2" strokeWidth={2} fill="url(#gProj)" />
+        <Area type="monotone" dataKey="subscriptions" name={t("charts.subscriptions")} stroke="#22C55E" strokeWidth={2} fill="url(#gSub)" />
       </AreaChart>
     </ResponsiveContainer>
   );
 }
 
 export function ProfitBarChart({ data }: { data: MonthPoint[] }) {
+  const t = useT();
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data} margin={{ left: -10, right: 8, top: 8 }}>
@@ -56,15 +59,16 @@ export function ProfitBarChart({ data }: { data: MonthPoint[] }) {
         <XAxis dataKey="month" tick={{ fontSize: 12, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} width={60} tickFormatter={(v) => (Math.abs(v) >= 1000 ? `${v / 1000}k` : v)} />
         <Tooltip {...tooltipStyle} />
-        <Bar dataKey="expenses" name="Expenses" fill="#EF4444" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="profit" name="Net Profit" fill="#1877F2" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="expenses" name={t("charts.expenses")} fill="#EF4444" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="profit" name={t("charts.netProfit")} fill="#1877F2" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
 export function CategoryPie({ data }: { data: { name: string; value: number }[] }) {
-  if (!data.length) return <p className="py-16 text-center text-sm text-muted-foreground">No expense data</p>;
+  const t = useT();
+  if (!data.length) return <p className="py-16 text-center text-sm text-muted-foreground">{t("charts.noExpenseData")}</p>;
   return (
     <ResponsiveContainer width="100%" height={280}>
       <PieChart>

@@ -1,16 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
-import { useUI } from "@/lib/store";
-
-/** Applies RTL/LTR direction based on the selected language. */
+/**
+ * Layout wrapper for the authenticated app. Direction (LTR/RTL) is managed
+ * globally by I18nProvider, so this just provides the surface background.
+ */
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const lang = useUI((s) => s.lang);
-
-  useEffect(() => {
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = lang;
-  }, [lang]);
-
   return <div className="min-h-screen bg-surface">{children}</div>;
 }

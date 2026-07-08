@@ -10,6 +10,7 @@ import { ListToolbar } from "@/components/list-toolbar";
 import { TransactionForm } from "@/components/transactions/transaction-form";
 import { RowDelete } from "@/components/row-delete";
 import { createTransaction, deleteTransaction } from "./actions";
+import { getT } from "@/lib/i18n-server";
 import { PAYMENT_METHOD, label } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -17,6 +18,7 @@ export const dynamic = "force-dynamic";
 
 export default async function TransactionsPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const sp = await searchParams;
+  const { t, locale } = await getT();
   await connectDB();
   const filter: any = {};
   if (sp.q) filter.title = new RegExp(sp.q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
@@ -34,40 +36,40 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
 
   return (
     <div className="animate-fade-in space-y-6">
-      <PageHeader title="Transactions" subtitle="All incoming money across payment methods." />
+      <PageHeader title={t("transactions.title")} subtitle={t("transactions.subtitle")} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-        <StatCard title="Total Incoming" value={total} icon={Wallet} tone="success" currency />
+        <StatCard title={t("transactions.totalIncoming")} value={total} icon={Wallet} tone="success" currency />
         {byMethod.map((b) => (
-          <StatCard key={b.m} title={label(b.m)} value={b.total} icon={ArrowDownToLine} tone="primary" currency />
+          <StatCard key={b.m} title={label(b.m, locale)} value={b.total} icon={ArrowDownToLine} tone="primary" currency />
         ))}
       </div>
 
       <TransactionForm action={createTransaction} clients={JSON.parse(JSON.stringify(clients))} />
 
       <ListToolbar
-        placeholder="Search transactions…"
+        placeholder={t("transactions.searchPlaceholder")}
         filters={[
-          { name: "method", label: "All methods", options: PAYMENT_METHOD.map((m) => ({ value: m, label: label(m) })) },
-          { name: "source", label: "All sources", options: [{ value: "project", label: "Project" }, { value: "subscription", label: "Subscription" }, { value: "other", label: "Other" }] },
+          { name: "method", label: t("common.allMethods"), options: PAYMENT_METHOD.map((m) => ({ value: m, label: label(m, locale) })) },
+          { name: "source", label: t("common.allSources"), options: [{ value: "project", label: label("project", locale) }, { value: "subscription", label: label("subscription", locale) }, { value: "other", label: label("other", locale) }] },
         ]}
       />
 
       {txns.length === 0 ? (
-        <EmptyState icon={<ArrowDownToLine className="h-5 w-5" />} title="No transactions" description="Record incoming money above." />
+        <EmptyState icon={<ArrowDownToLine className="h-5 w-5" />} title={t("transactions.empty")} description={t("transactions.emptyDesc")} />
       ) : (
         <Table>
-          <THead><TR><TH>Title</TH><TH>Client</TH><TH>Source</TH><TH>Method</TH><TH>Amount</TH><TH>Date</TH><TH></TH></TR></THead>
+          <THead><TR><TH>{t("common.title")}</TH><TH>{t("common.client")}</TH><TH>{t("transactions.source")}</TH><TH>{t("common.method")}</TH><TH>{t("common.amount")}</TH><TH>{t("common.date")}</TH><TH></TH></TR></THead>
           <tbody>
-            {txns.map((t: any) => (
-              <TR key={t._id}>
-                <TD className="font-medium">{t.title}</TD>
-                <TD className="text-muted-foreground">{t.clientId?.name || "—"}</TD>
-                <TD><Badge tone={t.source === "subscription" ? "success" : t.source === "project" ? "primary" : "muted"}>{t.source}</Badge></TD>
-                <TD>{label(t.method)}</TD>
-                <TD className="font-semibold text-success">{formatCurrency(t.amount)}</TD>
-                <TD>{formatDate(t.date)}</TD>
-                <TD className="text-end"><RowDelete action={deleteTransaction.bind(null, String(t._id))} /></TD>
+            {txns.map((tx: any) => (
+              <TR key={tx._id}>
+                <TD className="font-medium">{tx.title}</TD>
+                <TD className="text-muted-foreground">{tx.clientId?.name || "—"}</TD>
+                <TD><Badge tone={tx.source === "subscription" ? "success" : tx.source === "project" ? "primary" : "muted"}>{label(tx.source, locale)}</Badge></TD>
+                <TD>{label(tx.method, locale)}</TD>
+                <TD className="font-semibold text-success">{formatCurrency(tx.amount)}</TD>
+                <TD>{formatDate(tx.date)}</TD>
+                <TD className="text-end"><RowDelete action={deleteTransaction.bind(null, String(tx._id))} /></TD>
               </TR>
             ))}
           </tbody>

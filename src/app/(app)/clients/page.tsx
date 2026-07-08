@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge";
 import { Table, THead, TR, TH, TD } from "@/components/ui/table";
 import { ListToolbar } from "@/components/list-toolbar";
-import { CLIENT_STATUS } from "@/lib/constants";
+import { getT } from "@/lib/i18n-server";
+import { CLIENT_STATUS, label } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
 export default async function ClientsPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
   const sp = await searchParams;
+  const { t, locale } = await getT();
   await connectDB();
 
   const filter: any = {};
@@ -32,33 +34,33 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Clients" subtitle={`${total} client${total === 1 ? "" : "s"} total`}>
+      <PageHeader title={t("clients.title")} subtitle={t("clients.count", { count: total })}>
         <Link href="/clients/new">
-          <Button><Plus className="h-4 w-4" /> New client</Button>
+          <Button><Plus className="h-4 w-4" /> {t("clients.new")}</Button>
         </Link>
       </PageHeader>
 
       <ListToolbar
-        placeholder="Search by name, company, email, phone…"
-        filters={[{ name: "status", label: "All statuses", options: CLIENT_STATUS.map((s) => ({ value: s, label: s })) }]}
+        placeholder={t("clients.searchPlaceholder")}
+        filters={[{ name: "status", label: t("common.allStatuses"), options: CLIENT_STATUS.map((s) => ({ value: s, label: label(s, locale) })) }]}
       />
 
       {clients.length === 0 ? (
         <EmptyState
           icon={<Users className="h-5 w-5" />}
-          title="No clients found"
-          description="Add your first client to start managing projects and contracts."
-          action={<Link href="/clients/new"><Button><Plus className="h-4 w-4" /> New client</Button></Link>}
+          title={t("clients.empty")}
+          description={t("clients.emptyDesc")}
+          action={<Link href="/clients/new"><Button><Plus className="h-4 w-4" /> {t("clients.new")}</Button></Link>}
         />
       ) : (
         <>
           <Table>
             <THead>
               <TR>
-                <TH>Client</TH>
-                <TH>Company</TH>
-                <TH>Phone</TH>
-                <TH>Status</TH>
+                <TH>{t("common.client")}</TH>
+                <TH>{t("clients.company")}</TH>
+                <TH>{t("clients.phone")}</TH>
+                <TH>{t("common.status")}</TH>
               </TR>
             </THead>
             <tbody>

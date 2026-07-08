@@ -5,12 +5,14 @@ import { useTheme } from "next-themes";
 import { signOut, useSession } from "next-auth/react";
 import { Menu, Search, Moon, Sun, Languages, LogOut, User as UserIcon } from "lucide-react";
 import { useUI } from "@/lib/store";
+import { useI18n } from "@/components/i18n-provider";
 import { Avatar } from "@/components/ui/misc";
 import { NotificationsBell } from "./notifications-bell";
 import { GlobalSearch } from "./global-search";
 
 export function Header() {
-  const { toggleSidebar, lang, setLang } = useUI();
+  const { toggleSidebar } = useUI();
+  const { locale, toggle, t } = useI18n();
   const { theme, setTheme } = useTheme();
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -27,22 +29,22 @@ export function Header() {
         className="flex h-9 w-full max-w-md items-center gap-2 rounded-md border border-border bg-surface px-3 text-sm text-muted-foreground transition-colors hover:border-primary/40"
       >
         <Search className="h-4 w-4" />
-        <span>Search clients, projects, contracts…</span>
+        <span>{t("header.searchPlaceholder")}</span>
       </button>
 
       <div className="ms-auto flex items-center gap-1">
         <button
-          onClick={() => setLang(lang === "en" ? "ar" : "en")}
+          onClick={toggle}
           className="flex h-9 items-center gap-1.5 rounded-md px-2.5 text-sm font-medium hover:bg-muted"
-          title="Toggle language"
+          title={t("common.toggleLanguage")}
         >
           <Languages className="h-[18px] w-[18px]" />
-          {lang === "en" ? "EN" : "ع"}
+          {locale === "en" ? "العربية" : "EN"}
         </button>
         <button
           onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="flex h-9 w-9 items-center justify-center rounded-md hover:bg-muted"
-          title="Toggle theme"
+          title={t("common.toggleTheme")}
         >
           <Sun className="h-[18px] w-[18px] dark:hidden" />
           <Moon className="hidden h-[18px] w-[18px] dark:block" />
@@ -66,13 +68,13 @@ export function Header() {
                   </span>
                 </div>
                 <a href="/settings" className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted">
-                  <UserIcon className="h-4 w-4" /> Settings
+                  <UserIcon className="h-4 w-4" /> {t("nav.settings")}
                 </a>
                 <button
                   onClick={() => signOut({ callbackUrl: "/login" })}
                   className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-danger hover:bg-danger/10"
                 >
-                  <LogOut className="h-4 w-4" /> Sign out
+                  <LogOut className="h-4 w-4" /> {t("common.signOut")}
                 </button>
               </div>
             </>

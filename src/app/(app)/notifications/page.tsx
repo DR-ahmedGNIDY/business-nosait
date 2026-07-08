@@ -5,6 +5,7 @@ import { Notification } from "@/models/Notification";
 import { PageHeader, EmptyState } from "@/components/ui/misc";
 import { Card, CardContent } from "@/components/ui/card";
 import { NotificationActions } from "@/components/notifications/notification-actions";
+import { getT } from "@/lib/i18n-server";
 import { formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -12,18 +13,19 @@ export const dynamic = "force-dynamic";
 const ICONS: Record<string, any> = { renewal: RefreshCw, payment: Wallet, subscription: RefreshCw, contract: FileSignature, task: CircleAlert, system: Bell };
 
 export default async function NotificationsPage() {
+  const { t } = await getT();
   await connectDB();
   const items = await Notification.find().sort({ createdAt: -1 }).limit(100).lean();
   const unread = items.filter((n: any) => !n.read).length;
 
   return (
     <div className="animate-fade-in space-y-6">
-      <PageHeader title="Notifications" subtitle={`${unread} unread of ${items.length}`}>
+      <PageHeader title={t("notifications.title")} subtitle={t("notifications.summary", { unread, total: items.length })}>
         <NotificationActions hasItems={items.length > 0} />
       </PageHeader>
 
       {items.length === 0 ? (
-        <EmptyState icon={<Bell className="h-5 w-5" />} title="No notifications" description="Renewal, payment and contract alerts will appear here." />
+        <EmptyState icon={<Bell className="h-5 w-5" />} title={t("notifications.empty")} description={t("notifications.emptyDesc")} />
       ) : (
         <Card>
           <CardContent className="divide-y divide-border p-0">
