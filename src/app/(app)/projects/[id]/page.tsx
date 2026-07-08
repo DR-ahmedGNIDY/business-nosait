@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import mongoose from "mongoose";
 import { Pencil, Calendar, User } from "lucide-react";
 import { connectDB } from "@/lib/db";
 import { Project } from "@/models/Project";
@@ -19,6 +20,7 @@ export const dynamic = "force-dynamic";
 
 export default async function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (!mongoose.Types.ObjectId.isValid(id)) notFound();
   await connectDB();
   const project = await Project.findById(id).lean<any>();
   if (!project) notFound();

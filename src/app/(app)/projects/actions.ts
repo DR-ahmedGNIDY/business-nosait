@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import mongoose from "mongoose";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
@@ -36,6 +37,7 @@ export async function createProject(formData: FormData) {
 
 export async function updateProject(id: string, formData: FormData) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Project not found" };
   const parsed = projectSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0]?.message || "Invalid input" };
   await connectDB();
@@ -56,6 +58,7 @@ export async function updateProject(id: string, formData: FormData) {
 
 export async function deleteProject(id: string) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Project not found" };
   await connectDB();
   await Project.findByIdAndDelete(id);
   await logActivity({ action: "delete", entity: "Project", entityId: id, description: "Deleted a project" });
@@ -66,6 +69,7 @@ export async function deleteProject(id: string) {
 
 export async function addPayment(id: string, formData: FormData) {
   await requireSession();
+  if (!mongoose.Types.ObjectId.isValid(id)) return { error: "Project not found" };
   const parsed = paymentSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.errors[0]?.message || "Invalid amount" };
   await connectDB();
