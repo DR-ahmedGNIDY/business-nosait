@@ -11,7 +11,8 @@ export const EXPENSE_CATEGORY = [
 ] as const;
 export const PAYMENT_METHOD = ["cash", "instapay", "bank", "vodafone_cash", "card"] as const;
 export const TRANSACTION_STATUS = ["completed", "pending", "cancelled", "refunded"] as const;
-export const TRANSACTION_SOURCE = ["project", "subscription", "other"] as const;
+export const TRANSACTION_SOURCE = ["project", "subscription", "manual", "other"] as const;
+export const TRANSACTION_TYPE = ["income", "expense", "adjustment"] as const;
 export const CONTRACT_STATUS = ["draft", "waiting_signature", "signed", "cancelled"] as const;
 export const CONTRACT_TEMPLATE = ["website", "store", "application", "hosting", "maintenance", "marketing"] as const;
 export const REMINDER_DAYS = [30, 15, 7, 3, 1] as const;
@@ -62,6 +63,11 @@ export const LABELS: Record<string, { en: string; ar: string; tone?: string }> =
   subscription: { en: "Subscription", ar: "اشتراك" },
   // Transaction statuses
   refunded: { en: "Refunded", ar: "مسترد", tone: "danger" },
+  // Transaction types / sources
+  income: { en: "Income", ar: "دخل", tone: "success" },
+  expense: { en: "Expense", ar: "مصروف", tone: "danger" },
+  adjustment: { en: "Adjustment", ar: "تسوية", tone: "warning" },
+  manual: { en: "Manual", ar: "يدوي", tone: "muted" },
 };
 
 export function label(key: string, lang: "en" | "ar" = "en") {

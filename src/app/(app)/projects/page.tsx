@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge, Badge } from "@/components/ui/badge";
 import { Table, THead, TR, TH, TD } from "@/components/ui/table";
 import { ListToolbar } from "@/components/list-toolbar";
+import { ExportMenu } from "@/components/export-menu";
 import { getT } from "@/lib/i18n-server";
 import { PROJECT_STATUS, label } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
@@ -30,6 +31,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
   return (
     <div className="animate-fade-in">
       <PageHeader title={t("projects.title")} subtitle={t("projects.summary", { count: projects.length, collected: formatCurrency(totalCollected), total: formatCurrency(totalValue) })}>
+        <ExportMenu entity="projects" params={sp} />
         <Link href="/projects/new"><Button><Plus className="h-4 w-4" /> {t("projects.new")}</Button></Link>
       </PageHeader>
 

@@ -6,10 +6,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { Project } from "@/models/Project";
-import { Transaction } from "@/models/Transaction";
 import { projectSchema, paymentSchema } from "@/lib/validations";
-import { syncProjectPayments } from "@/lib/sync";
-import { logActivity } from "@/lib/activity";
+import { createTransaction } from "@/lib/ledger";
+import { logActivity, notify, LARGE_PAYMENT_THRESHOLD } from "@/lib/activity";
+import { currentUserLabel } from "@/lib/session";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -71,22 +71,28 @@ export async function addPayment(id: string, formData: FormData) {
   await connectDB();
   const project = await Project.findById(id);
   if (!project) return { error: "Project not found" };
-  // Transaction is the source of truth; the project projection is synced after.
-  await Transaction.create({
+  // Transaction is the source of truth; the project projection is synced inside the ledger.
+  const doc = await createTransaction({
     title: `Payment — ${project.title}`,
     amount: parsed.data.amount,
     method: parsed.data.method,
     source: "project",
-    status: "completed",
+    type: "income",
     clientId: project.clientId,
     projectId: project._id,
     note: parsed.data.note,
+    createdBy: await currentUserLabel(),
   });
-  await syncProjectPayments(project._id);
-  await logActivity({ action: "payment", entity: "Project", entityId: id, description: `Recorded payment on ${project.title}` });
+  await logActivity({ action: "payment", entity: "Project", entityId: id, description: `Recorded ${doc.referenceNumber} on ${project.title}` });
+  await notify({ type: "payment", title: "Payment received", message: `${doc.referenceNumber} — ${project.title} (${doc.amount})`, link: `/projects/${id}`, entityId: id });
+  if (doc.amount >= LARGE_PAYMENT_THRESHOLD) {
+    await notify({ type: "payment", title: "Large payment received", message: `${doc.referenceNumber} — ${doc.amount}`, link: `/projects/${id}`, entityId: id });
+  }
   revalidatePath(`/projects/${id}`);
   revalidatePath("/projects");
+  revalidatePath("/clients");
   revalidatePath("/transactions");
+  revalidatePath("/reports");
   revalidatePath("/dashboard");
   return { ok: true };
 }

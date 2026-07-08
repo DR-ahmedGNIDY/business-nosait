@@ -1,17 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { Transaction } from "@/models/Transaction";
-import { transactionSchema } from "@/lib/validations";
-import { syncProjectPayments, syncSubscriptionCollected } from "@/lib/sync";
-import { logActivity } from "@/lib/activity";
+import { transactionSchema, transactionUpdateSchema } from "@/lib/validations";
+import { createTransaction as ledgerCreate, softDeleteTransaction, updateTransaction as ledgerUpdate } from "@/lib/ledger";
+import { logActivity, notify, LARGE_PAYMENT_THRESHOLD } from "@/lib/activity";
+import { requireSession, currentUserLabel } from "@/lib/session";
 
-async function requireSession() {
-  const session = await getServerSession(authOptions);
-  if (!session) throw new Error("Unauthorized");
+function revalidateFinance() {
+  revalidatePath("/transactions");
+  revalidatePath("/projects");
+  revalidatePath("/subscriptions");
+  revalidatePath("/clients");
+  revalidatePath("/reports");
+  revalidatePath("/dashboard");
 }
 
 export async function createTransaction(formData: FormData) {
@@ -20,32 +23,46 @@ export async function createTransaction(formData: FormData) {
   if (!parsed.success) return { error: parsed.error.errors[0]?.message || "Invalid input" };
   await connectDB();
   const { date, clientId, projectId, subscriptionId, ...rest } = parsed.data;
-  const doc = await Transaction.create({
+  const createdBy = await currentUserLabel();
+  const doc = await ledgerCreate({
     ...rest,
-    clientId: clientId || undefined,
-    projectId: projectId || undefined,
-    subscriptionId: subscriptionId || undefined,
+    type: rest.source === "manual" ? "adjustment" : "income",
+    clientId: clientId ? (clientId as any) : undefined,
+    projectId: projectId ? (projectId as any) : undefined,
+    subscriptionId: subscriptionId ? (subscriptionId as any) : undefined,
     date: date ? new Date(date) : new Date(),
+    createdBy,
   });
-  // Keep the linked object's collected/remaining projection in sync.
-  if (doc.source === "project" && doc.projectId) await syncProjectPayments(doc.projectId);
-  if (doc.source === "subscription" && doc.subscriptionId) await syncSubscriptionCollected(doc.subscriptionId);
-  await logActivity({ action: "create", entity: "Transaction", description: `Recorded ${rest.title}` });
-  revalidatePath("/transactions");
-  revalidatePath("/projects");
-  revalidatePath("/subscriptions");
-  revalidatePath("/dashboard");
+
+  await logActivity({ action: "create", entity: "Transaction", entityId: String(doc._id), description: `Recorded ${doc.referenceNumber} — ${doc.title}` });
+  await notify({ type: "payment", title: "New transaction", message: `${doc.referenceNumber} — ${doc.title} (${doc.amount})`, link: "/transactions", entityId: String(doc._id) });
+  if (doc.status === "completed" && doc.amount >= LARGE_PAYMENT_THRESHOLD) {
+    await notify({ type: "payment", title: "Large payment received", message: `${doc.referenceNumber} — ${doc.amount}`, link: "/transactions", entityId: String(doc._id) });
+  }
+  revalidateFinance();
+  return { ok: true };
+}
+
+export async function updateTransaction(id: string, formData: FormData) {
+  await requireSession();
+  const parsed = transactionUpdateSchema.safeParse(Object.fromEntries(formData));
+  if (!parsed.success) return { error: parsed.error.errors[0]?.message || "Invalid input" };
+  await connectDB();
+  const { date, ...rest } = parsed.data;
+  const doc = await ledgerUpdate(id, { ...rest, ...(date ? { date: new Date(date) } : {}) });
+  if (!doc) return { error: "Transaction not found" };
+  await logActivity({ action: "update", entity: "Transaction", entityId: id, description: `Edited ${doc.referenceNumber}` });
+  revalidateFinance();
   return { ok: true };
 }
 
 export async function deleteTransaction(id: string) {
   await requireSession();
   await connectDB();
-  const doc = await Transaction.findByIdAndDelete(id);
-  if (doc?.source === "project" && doc.projectId) await syncProjectPayments(doc.projectId);
-  if (doc?.source === "subscription" && doc.subscriptionId) await syncSubscriptionCollected(doc.subscriptionId);
-  revalidatePath("/transactions");
-  revalidatePath("/projects");
-  revalidatePath("/subscriptions");
-  revalidatePath("/dashboard");
+  const doc = await softDeleteTransaction(id);
+  if (doc) {
+    await logActivity({ action: "delete", entity: "Transaction", entityId: id, description: `Deleted ${doc.referenceNumber} — ${doc.title}` });
+  }
+  revalidateFinance();
+  return { ok: true };
 }

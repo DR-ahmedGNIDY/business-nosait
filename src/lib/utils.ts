@@ -24,6 +24,14 @@ export function formatDate(date: Date | string | undefined | null, locale = "en-
   return new Intl.DateTimeFormat(locale, { day: "2-digit", month: "short", year: "numeric" }).format(d);
 }
 
+/** ISO date (YYYY-MM-DD) for exports / machine-readable fields. */
+export function formatDateISO(date: Date | string | undefined | null) {
+  if (!date) return "";
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
+}
+
 export function daysUntil(date: Date | string | undefined | null): number | null {
   if (!date) return null;
   const d = typeof date === "string" ? new Date(date) : date;

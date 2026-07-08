@@ -73,6 +73,17 @@ export const transactionSchema = z
   .refine((d) => d.source !== "project" || !!d.projectId, { message: "Project is required", path: ["projectId"] })
   .refine((d) => d.source !== "subscription" || !!d.subscriptionId, { message: "Subscription is required", path: ["subscriptionId"] });
 
+// Editing keeps the object link/source fixed (referential integrity); only
+// mutable ledger fields can change.
+export const transactionUpdateSchema = z.object({
+  title: z.string().min(2),
+  amount: z.coerce.number().positive(),
+  method: z.enum(PAYMENT_METHOD).default("cash"),
+  status: z.enum(TRANSACTION_STATUS).default("completed"),
+  date: z.string().optional(),
+  note: z.string().optional(),
+});
+
 export const contractSchema = z.object({
   title: z.string().min(2),
   template: z.enum(CONTRACT_TEMPLATE).default("website"),

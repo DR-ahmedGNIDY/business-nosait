@@ -6,6 +6,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Table, THead, TR, TH, TD } from "@/components/ui/table";
 import { ListToolbar } from "@/components/list-toolbar";
+import { ExportMenu } from "@/components/export-menu";
 import { ExpenseForm } from "@/components/expenses/expense-form";
 import { CategoryPie } from "@/components/dashboard/charts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -37,7 +38,9 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Pro
 
   return (
     <div className="animate-fade-in space-y-6">
-      <PageHeader title={t("expenses.title")} subtitle={t("expenses.subtitle")} />
+      <PageHeader title={t("expenses.title")} subtitle={t("expenses.subtitle")}>
+        <ExportMenu entity="expenses" params={sp} />
+      </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard title={t("expenses.thisMonth")} value={monthTotal} icon={CalendarDays} tone="warning" currency />

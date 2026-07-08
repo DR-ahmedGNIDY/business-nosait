@@ -19,7 +19,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur lg:px-6">
+    <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-card/80 px-4 backdrop-blur lg:px-6 print:hidden">
       <button className="lg:hidden" onClick={toggleSidebar} aria-label="Menu">
         <Menu className="h-5 w-5" />
       </button>

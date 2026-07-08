@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { Expense } from "@/models/Expense";
 import { expenseSchema } from "@/lib/validations";
-import { logActivity } from "@/lib/activity";
+import { logActivity, notify } from "@/lib/activity";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -21,9 +21,11 @@ export async function createExpense(formData: FormData) {
   if (!parsed.success) return { error: parsed.error.errors[0]?.message || "Invalid input" };
   await connectDB();
   const { date, ...rest } = parsed.data;
-  await Expense.create({ ...rest, date: date ? new Date(date) : new Date() });
-  await logActivity({ action: "create", entity: "Expense", description: `Added expense ${rest.title}` });
+  const exp = await Expense.create({ ...rest, date: date ? new Date(date) : new Date() });
+  await logActivity({ action: "create", entity: "Expense", entityId: String(exp._id), description: `Added expense ${rest.title} (${rest.amount})` });
+  await notify({ type: "system", title: "Expense added", message: `${rest.title} — ${rest.amount}`, link: "/expenses", entityId: String(exp._id) });
   revalidatePath("/expenses");
+  revalidatePath("/reports");
   revalidatePath("/dashboard");
   return { ok: true };
 }

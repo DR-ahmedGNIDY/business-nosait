@@ -11,6 +11,7 @@ export const config = {
     "/contracts/:path*",
     "/reports/:path*",
     "/notifications/:path*",
+    "/activity/:path*",
     "/settings/:path*",
   ],
 };

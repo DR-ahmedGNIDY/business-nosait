@@ -12,9 +12,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <AppShell>
       <Sidebar />
-      <div className="flex min-h-screen flex-col ltr:lg:pl-64 rtl:lg:pr-64">
+      <div className="flex min-h-screen flex-col ltr:lg:pl-64 rtl:lg:pr-64 print:!pl-0 print:!pr-0">
         <Header />
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
+        <main className="flex-1 p-4 lg:p-6 print:p-0">{children}</main>
       </div>
     </AppShell>
   );

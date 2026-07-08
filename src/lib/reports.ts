@@ -15,7 +15,7 @@ export async function getReportData() {
     Expense.find().lean(),
     Client.find().lean(),
     Contract.find().lean(),
-    Transaction.find({ status: "completed" }).lean(),
+    Transaction.find({ status: "completed", deletedAt: null }).lean(),
   ]);
 
   // Collected amounts are derived from completed transactions (single source of truth).

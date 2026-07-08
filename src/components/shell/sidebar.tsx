@@ -21,7 +21,7 @@ export function Sidebar() {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 z-40 flex w-64 flex-col border-r border-border bg-card transition-transform duration-200 lg:translate-x-0",
+          "fixed inset-y-0 z-40 flex w-64 flex-col border-r border-border bg-card transition-transform duration-200 lg:translate-x-0 print:hidden",
           "ltr:left-0 rtl:right-0",
           sidebarOpen ? "translate-x-0" : "ltr:-translate-x-full rtl:translate-x-full"
         )}

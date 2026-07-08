@@ -1,5 +1,8 @@
 {
-  "brand": { "name": "Nosait Business", "tagline": "Manage Clients • Projects • Contracts" },
+  "brand": {
+    "name": "Nosait Business",
+    "tagline": "Manage Clients • Projects • Contracts"
+  },
   "nav": {
     "Overview": "Overview",
     "Manage": "Manage",
@@ -16,7 +19,8 @@
     "notifications": "Notifications",
     "settings": "Settings",
     "premium": "Premium workspace",
-    "premiumSub": "All modules unlocked."
+    "premiumSub": "All modules unlocked.",
+    "activity": "Activity Log"
   },
   "common": {
     "save": "Save",
@@ -53,9 +57,13 @@
     "allSources": "All sources",
     "signOut": "Sign out",
     "toggleTheme": "Toggle theme",
-    "toggleLanguage": "Toggle language"
+    "toggleLanguage": "Toggle language",
+    "allTime": "All time",
+    "allClients": "All clients"
   },
-  "header": { "searchPlaceholder": "Search clients, projects, contracts…" },
+  "header": {
+    "searchPlaceholder": "Search clients, projects, contracts…"
+  },
   "search": {
     "placeholder": "Search clients, projects, contracts…",
     "noResults": "No results for “{q}”",
@@ -180,7 +188,11 @@
     "searchPlaceholder": "Search transactions…",
     "empty": "No transactions",
     "emptyDesc": "Record incoming money above.",
-    "source": "Source"
+    "source": "Source",
+    "reference": "Reference",
+    "linkedTo": "Linked to",
+    "createdBy": "Created by",
+    "printReceipt": "Print Receipt"
   },
   "reports": {
     "title": "Reports",
@@ -223,5 +235,15 @@
     "dark": "Dark",
     "system": "System",
     "brandColorHint": "Facebook Business blue by default"
+  },
+  "period": {
+    "today": "Today",
+    "week": "This week",
+    "month": "This month",
+    "year": "This year"
+  },
+  "activity": {
+    "title": "Activity Log",
+    "subtitle": "Every important action, who did it, and when."
   }
 }

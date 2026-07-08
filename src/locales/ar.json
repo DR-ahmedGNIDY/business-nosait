@@ -1,5 +1,8 @@
 {
-  "brand": { "name": "نُصيت بزنس", "tagline": "إدارة العملاء • المشاريع • العقود" },
+  "brand": {
+    "name": "نُصيت بزنس",
+    "tagline": "إدارة العملاء • المشاريع • العقود"
+  },
   "nav": {
     "Overview": "نظرة عامة",
     "Manage": "الإدارة",
@@ -16,7 +19,8 @@
     "notifications": "الإشعارات",
     "settings": "الإعدادات",
     "premium": "مساحة عمل مميّزة",
-    "premiumSub": "كل الوحدات مفعّلة."
+    "premiumSub": "كل الوحدات مفعّلة.",
+    "activity": "سجل النشاط"
   },
   "common": {
     "save": "حفظ",
@@ -53,9 +57,13 @@
     "allSources": "كل المصادر",
     "signOut": "تسجيل الخروج",
     "toggleTheme": "تبديل السمة",
-    "toggleLanguage": "تبديل اللغة"
+    "toggleLanguage": "تبديل اللغة",
+    "allTime": "كل الوقت",
+    "allClients": "كل العملاء"
   },
-  "header": { "searchPlaceholder": "ابحث عن العملاء والمشاريع والعقود…" },
+  "header": {
+    "searchPlaceholder": "ابحث عن العملاء والمشاريع والعقود…"
+  },
   "search": {
     "placeholder": "ابحث عن العملاء والمشاريع والعقود…",
     "noResults": "لا نتائج لـ «{q}»",
@@ -180,7 +188,11 @@
     "searchPlaceholder": "ابحث في المعاملات…",
     "empty": "لا توجد معاملات",
     "emptyDesc": "سجّل الأموال الواردة بالأعلى.",
-    "source": "المصدر"
+    "source": "المصدر",
+    "reference": "المرجع",
+    "linkedTo": "مرتبط بـ",
+    "createdBy": "أنشأها",
+    "printReceipt": "طباعة الإيصال"
   },
   "reports": {
     "title": "التقارير",
@@ -223,5 +235,15 @@
     "dark": "داكن",
     "system": "النظام",
     "brandColorHint": "أزرق فيسبوك بزنس افتراضيًا"
+  },
+  "period": {
+    "today": "اليوم",
+    "week": "هذا الأسبوع",
+    "month": "هذا الشهر",
+    "year": "هذه السنة"
+  },
+  "activity": {
+    "title": "سجل النشاط",
+    "subtitle": "كل إجراء مهم، ومن قام به، ومتى."
   }
 }

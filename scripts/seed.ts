@@ -10,6 +10,7 @@ import { Expense } from "../src/models/Expense";
 import { Transaction } from "../src/models/Transaction";
 import { Contract } from "../src/models/Contract";
 import { Settings } from "../src/models/Settings";
+import { Counter } from "../src/models/Counter";
 import { slugId } from "../src/lib/utils";
 
 function addDays(n: number) {
@@ -28,6 +29,7 @@ async function main() {
     Transaction.deleteMany({}),
     Contract.deleteMany({}),
     Settings.deleteMany({}),
+    Counter.deleteMany({}),
   ]);
 
   await User.create({
@@ -67,9 +69,16 @@ async function main() {
   ]);
 
   await Transaction.create([
-    { title: "Website advance", amount: 20000, method: "instapay", source: "project", status: "completed", clientId: clients[0]._id, projectId: p1._id, date: addDays(-25) },
-    { title: "Store full payment", amount: 65000, method: "bank", source: "project", status: "completed", clientId: clients[1]._id, projectId: p2._id, date: addDays(-15) },
-    { title: "Maintenance fee", amount: 1500, method: "vodafone_cash", source: "subscription", status: "completed", clientId: clients[1]._id, subscriptionId: subs[2]._id, date: addDays(-1) },
+    { referenceNumber: "NB-TXN-000001", title: "Website advance", amount: 20000, type: "income", method: "instapay", source: "project", status: "completed", clientId: clients[0]._id, projectId: p1._id, createdBy: "Nosait Admin", date: addDays(-25) },
+    { referenceNumber: "NB-TXN-000002", title: "Store full payment", amount: 65000, type: "income", method: "bank", source: "project", status: "completed", clientId: clients[1]._id, projectId: p2._id, createdBy: "Nosait Admin", date: addDays(-15) },
+    { referenceNumber: "NB-TXN-000003", title: "Maintenance fee", amount: 1500, type: "income", method: "vodafone_cash", source: "subscription", status: "completed", clientId: clients[1]._id, subscriptionId: subs[2]._id, createdBy: "Nosait Admin", date: addDays(-1) },
+  ]);
+
+  // Advance sequence counters so app-generated numbers never collide with seeded ones.
+  const year = new Date().getFullYear();
+  await Counter.create([
+    { _id: "txn", seq: 3 },
+    { _id: `contract-${year}`, seq: 1 },
   ]);
 
   await Contract.create({

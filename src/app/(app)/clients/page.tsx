@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge";
 import { Table, THead, TR, TH, TD } from "@/components/ui/table";
 import { ListToolbar } from "@/components/list-toolbar";
+import { ExportMenu } from "@/components/export-menu";
 import { getT } from "@/lib/i18n-server";
 import { CLIENT_STATUS, label } from "@/lib/constants";
 
@@ -35,6 +36,7 @@ export default async function ClientsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="animate-fade-in">
       <PageHeader title={t("clients.title")} subtitle={t("clients.count", { count: total })}>
+        <ExportMenu entity="clients" params={sp} />
         <Link href="/clients/new">
           <Button><Plus className="h-4 w-4" /> {t("clients.new")}</Button>
         </Link>

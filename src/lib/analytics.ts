@@ -30,7 +30,7 @@ export async function getDashboardData() {
     Expense.find().lean(),
     Client.countDocuments(),
     Contract.find().lean(),
-    Transaction.find({ status: "completed" }).lean(),
+    Transaction.find({ status: "completed", deletedAt: null }).lean(),
   ]);
 
   // ---- Revenue from completed transactions (single source of truth) ----

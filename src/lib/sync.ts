@@ -12,7 +12,7 @@ export async function syncProjectPayments(projectId: string | Types.ObjectId) {
   const project = await Project.findById(projectId);
   if (!project) return;
   const agg = await Transaction.aggregate([
-    { $match: { projectId: new Types.ObjectId(String(projectId)), source: "project", status: "completed" } },
+    { $match: { projectId: new Types.ObjectId(String(projectId)), source: "project", status: "completed", deletedAt: null } },
     { $group: { _id: null, total: { $sum: "$amount" } } },
   ]);
   project.paidAmount = agg[0]?.total || 0;
@@ -26,7 +26,7 @@ export async function syncSubscriptionCollected(subscriptionId: string | Types.O
   const sub = await Subscription.findById(subscriptionId);
   if (!sub) return;
   const agg = await Transaction.aggregate([
-    { $match: { subscriptionId: new Types.ObjectId(String(subscriptionId)), source: "subscription", status: "completed" } },
+    { $match: { subscriptionId: new Types.ObjectId(String(subscriptionId)), source: "subscription", status: "completed", deletedAt: null } },
     { $group: { _id: null, total: { $sum: "$amount" } } },
   ]);
   const total = agg[0]?.total || 0;

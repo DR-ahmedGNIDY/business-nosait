@@ -10,6 +10,7 @@ import { Client } from "@/models/Client";
 import { contractSchema } from "@/lib/validations";
 import { logActivity, notify } from "@/lib/activity";
 import { slugId } from "@/lib/utils";
+import { nextSequence } from "@/models/Counter";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -18,8 +19,9 @@ async function requireSession() {
 
 async function nextContractNumber() {
   const year = new Date().getFullYear();
-  const count = await Contract.countDocuments();
-  return `NB-${year}-${String(count + 1).padStart(4, "0")}`;
+  // Atomic, monotonic sequence — never repeats even after deletions.
+  const n = await nextSequence(`contract-${year}`);
+  return `NB-${year}-${String(n).padStart(4, "0")}`;
 }
 
 export async function createContract(formData: FormData) {
@@ -61,8 +63,10 @@ export async function setContractStatus(id: string, status: "draft" | "waiting_s
   if (!contract) return { error: "Not found" };
   contract.status = status;
   if (status === "waiting_signature") contract.timeline.push({ event: "sent", at: new Date() });
+  if (status === "signed") contract.timeline.push({ event: "signed", at: new Date() });
   await contract.save();
   await logActivity({ action: "status", entity: "Contract", entityId: id, description: `Contract ${contract.contractNumber} → ${status}` });
+  if (status === "signed") await notify({ type: "contract", title: "Contract signed", message: `${contract.contractNumber} marked signed`, link: `/contracts/${id}`, entityId: id });
   revalidatePath(`/contracts/${id}`);
   return { ok: true };
 }
@@ -82,7 +86,8 @@ export async function saveCompanySignature(id: string, dataUrl: string, name: st
 export async function deleteContract(id: string) {
   await requireSession();
   await connectDB();
-  await Contract.findByIdAndDelete(id);
+  const contract = await Contract.findByIdAndDelete(id);
+  await logActivity({ action: "delete", entity: "Contract", entityId: id, description: `Deleted contract ${contract?.contractNumber || id}` });
   revalidatePath("/contracts");
   redirect("/contracts");
 }

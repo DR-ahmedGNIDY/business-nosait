@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge, Badge } from "@/components/ui/badge";
 import { Table, THead, TR, TH, TD } from "@/components/ui/table";
 import { ListToolbar } from "@/components/list-toolbar";
+import { ExportMenu } from "@/components/export-menu";
 import { SubRowActions } from "@/components/subscriptions/row-actions";
 import { collectSubscription, renewSubscription, deleteSubscription } from "./actions";
 import { getT } from "@/lib/i18n-server";
@@ -36,6 +37,7 @@ export default async function SubscriptionsPage({ searchParams }: { searchParams
   return (
     <div className="animate-fade-in space-y-6">
       <PageHeader title={t("subscriptions.title")} subtitle={t("subscriptions.subtitle")}>
+        <ExportMenu entity="subscriptions" params={sp} />
         <Link href="/subscriptions/new"><Button><Plus className="h-4 w-4" /> {t("subscriptions.new")}</Button></Link>
       </PageHeader>
 

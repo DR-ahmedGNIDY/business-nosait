@@ -7,6 +7,7 @@ export interface IActivityLog {
   entityId?: mongoose.Types.ObjectId;
   description: string;
   userName?: string;
+  ip?: string;
   createdAt: Date;
 }
 
@@ -17,10 +18,12 @@ const ActivityLogSchema = new Schema<IActivityLog>(
     entityId: Schema.Types.ObjectId,
     description: { type: String, required: true },
     userName: String,
+    ip: String,
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
 ActivityLogSchema.index({ createdAt: -1 });
+ActivityLogSchema.index({ entity: 1, createdAt: -1 });
 
 export const ActivityLog = models.ActivityLog || model<IActivityLog>("ActivityLog", ActivityLogSchema);

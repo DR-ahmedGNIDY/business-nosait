@@ -6,10 +6,10 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import { Subscription } from "@/models/Subscription";
-import { Transaction } from "@/models/Transaction";
 import { subscriptionSchema } from "@/lib/validations";
-import { syncSubscriptionCollected } from "@/lib/sync";
-import { logActivity } from "@/lib/activity";
+import { createTransaction } from "@/lib/ledger";
+import { logActivity, notify } from "@/lib/activity";
+import { currentUserLabel } from "@/lib/session";
 
 async function requireSession() {
   const session = await getServerSession(authOptions);
@@ -59,19 +59,22 @@ export async function collectSubscription(id: string) {
   await connectDB();
   const sub = await Subscription.findById(id);
   if (!sub) return { error: "Not found" };
-  await Transaction.create({
+  const doc = await createTransaction({
     title: `Subscription — ${sub.title}`,
     amount: sub.amount,
     method: "cash",
     source: "subscription",
-    status: "completed",
+    type: "income",
     clientId: sub.clientId,
     subscriptionId: sub._id,
+    createdBy: await currentUserLabel(),
   });
-  await syncSubscriptionCollected(sub._id); // sets collected from completed transactions
-  await logActivity({ action: "collect", entity: "Subscription", entityId: id, description: `Collected subscription ${sub.title}` });
+  await logActivity({ action: "collect", entity: "Subscription", entityId: id, description: `Collected ${doc.referenceNumber} — ${sub.title}` });
+  await notify({ type: "subscription", title: "Subscription collected", message: `${doc.referenceNumber} — ${sub.title}`, link: "/subscriptions", entityId: id });
   revalidatePath("/subscriptions");
   revalidatePath("/transactions");
+  revalidatePath("/clients");
+  revalidatePath("/reports");
   revalidatePath("/dashboard");
   return { ok: true };
 }
@@ -91,6 +94,8 @@ export async function renewSubscription(id: string) {
   sub.collected = false;
   await sub.save();
   await logActivity({ action: "renew", entity: "Subscription", entityId: id, description: `Renewed subscription ${sub.title}` });
+  await notify({ type: "renewal", title: "Subscription renewed", message: `${sub.title} — next renewal ${sub.renewalDate.toISOString().slice(0, 10)}`, link: "/subscriptions", entityId: id });
   revalidatePath("/subscriptions");
+  revalidatePath("/dashboard");
   return { ok: true };
 }

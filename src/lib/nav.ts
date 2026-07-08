@@ -8,6 +8,7 @@ import {
   FileSignature,
   BarChart3,
   Bell,
+  Activity,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -29,6 +30,7 @@ export const NAV: NavItem[] = [
   { key: "transactions", href: "/transactions", icon: ArrowDownToLine, group: "Finance" },
   { key: "reports", href: "/reports", icon: BarChart3, group: "Finance" },
   { key: "notifications", href: "/notifications", icon: Bell, group: "System" },
+  { key: "activity", href: "/activity", icon: Activity, group: "System" },
   { key: "settings", href: "/settings", icon: Settings, group: "System" },
 ];
 
